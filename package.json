@@ -1,0 +1,15 @@
+{
+  "name": "netlify-wellness-reservations",
+  "version": "1.0.0",
+  "description": "Wellness reservation system for Netlify",
+  "main": "index.js",
+  "scripts": {
+    "start": "netlify dev"
+  },
+  "dependencies": {
+    "pg": "^8.11.3",
+    "moment-timezone": "^0.5.45",
+    "csv-writer": "^1.6.0",
+    "stream-buffers": "^3.0.2"
+  }
+}
