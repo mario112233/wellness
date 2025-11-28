@@ -3,544 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌿 Wellness Rezerwacje</title>
-    
-    <link rel="manifest" href="/manifest.webmanifest">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <link rel="apple-touch-icon" href="/icons/icon-192.png">
-    <meta name="theme-color" content="#4CAF50">
-    
+    <title>Wellness Center - Rezerwacje</title>
     <style>
-        /* CSS DLA WYGLĄDU */
-        :root {
-            --primary-color: #4CAF50; 
-            --secondary-color: #81C784; 
-            --background-color: #F8FAF7; 
-            --card-bg: #FFFFFF;
-            --text-color: #333333;
-            --taken-color: #F44336; 
-            --reserved-by-user-color: #FFC107; 
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
-        
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            max-width: 900px; 
-            margin: 0 auto; 
-            padding: 25px; 
-            background: var(--background-color); 
-            color: var(--text-color);
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
         }
-        h2, h3, h4 { color: var(--primary-color); }
-
-        .card { 
-            background: var(--card-bg); 
-            padding: 30px; 
-            border-radius: 12px; 
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1); 
-            margin-bottom: 25px; 
+        h1 {
+            color: #4CAF50;
+            text-align: center;
+            margin-bottom: 30px;
         }
-
-        input, select { 
-            padding: 12px; 
-            margin: 8px 0; 
-            width: 100%; 
-            box-sizing: border-box; 
-            border: 1px solid #ddd;
-            border-radius: 6px;
-        }
-
-        button { 
-            background: var(--primary-color); 
-            color: white; 
-            border: none; 
-            padding: 12px 25px; 
-            cursor: pointer; 
-            width: 100%; 
-            border-radius: 6px;
-            transition: background-color 0.2s;
-        }
-
-        button:hover { background: #388E3C; }
-
-        .hidden { display: none; }
-        
-        /* Kalendarz */
-        .day-column { border: 1px solid #e0e0e0; }
-        .slot { 
-            display: flex; 
-            justify-content: space-between; 
-            padding: 12px; 
-            border-bottom: 1px solid #f0f0f0; 
-            align-items: center; 
-            border-radius: 4px;
-            margin: 5px 0;
-            font-weight: 500;
-        }
-
-        .slot.taken { background-color: #FEEAEA; color: var(--taken-color); }
-        .slot.my-reservation { background-color: #FFFDE7; color: var(--reserved-by-user-color); }
-        .slot.free { background-color: #E8F5E9; color: var(--primary-color); cursor: pointer; }
-        .slot.free:hover { background-color: #DCEFE0; }
-        .slot-actions { display: flex; gap: 8px; }
-        
-        .slot.taken button, .slot.my-reservation button { width: auto; padding: 6px 12px; font-size: 0.9em; }
-
-        #logout-btn { 
-            background: #6c757d; 
-            width: auto; 
-            display: inline-block;
-            margin-top: 10px;
-        }
-
-        /* Kontrola Admina */
-        #admin-controls > div {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px dashed #e0e0e0;
-        }
-
-        #admin-report-controls button {
-            background-color: #007bff;
-            margin-right: 5px;
-            width: auto;
-        }
-
-        #admin-report-controls select {
-            padding: 8px;
-            border-radius: 4px;
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
             border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            text-align: center;
         }
-
-        #admin-reservation-form button {
-            background-color: #FFA000;
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
         }
-        
-        /* Styl dla tabeli raportu */
-        #entries-report-table th, #entries-report-table td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: left;
+        button:hover {
+            background-color: #45a049;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .error {
+            background-color: #fdd;
+            color: #d00;
+        }
+        .success {
+            background-color: #dfd;
+            color: #0d0;
+        }
+        .admin-link {
+            float: right;
             font-size: 0.9em;
-        }
-        #entries-report-table th {
-            background-color: #f0f0f0;
+            color: #007bff;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-
-    <div id="login-screen" class="card">
-        <h2>Wellness Center - Rezerwacje</h2>
+    <div class="container">
+        <h1>Wellness Center - Rezerwacje</h1>
         
-        <div style="text-align: right; margin-bottom: 15px;">
-             <input type="checkbox" id="admin-checkbox" onchange="toggleAdminPassword()">
-             <label for="admin-checkbox" style="font-weight: bold; color: var(--primary-color);">Logowanie Admina</label>
-        </div>
-        
-        <input type="text" id="code-input" placeholder="Wpisz kod apartamentu (np. 1001) lub Login Admina (np. AGNIESZKA)">
-        
-        <div id="password-field" class="hidden">
-            <input type="password" id="pass-input" placeholder="Hasło administratora">
-        </div>
-        
-        <button onclick="handleLogin()">Wejdź do Strefy</button>
-        <p id="login-error" style="color:var(--taken-color); display:none; text-align: center; margin-top: 15px;"></p>
-    </div>
+        <span class="admin-link" id="admin-toggle">Logowanie Admina</span>
 
-    <div id="app-screen" class="hidden">
-        <div class="card">
-            <h3>Witaj, <span id="user-name"></span>!</h3>
-            <p style="font-size: 0.9em; color: #666;">Limit: 1 rezerwacja w 2-dniowym oknie. Anulowanie do 60 minut przed czasem.</p>
-            <button onclick="logout()" id="logout-btn">Wyloguj</button>
-            
-            <div id="admin-controls" class="hidden">
-                <h4>⚙️ Panel Administratora</h4>
+        <p id="input-label">Wpisz kod apartamentu (np. 1001)</p>
 
-                <div id="admin-reservation-form">
-                    <strong>Rezerwacja dla Apartamentu:</strong>
-                    <select id="apartment-select">
-                        <option value="">-- Wybierz Apartament --</option>
-                    </select>
-                    <button onclick="toggleAdminBookingMode()" style="background:orange;">Aktywuj Rezerwację Admina</button>
-                    <p id="admin-mode-status" style="color:var(--taken-color); margin-top:5px; font-weight:bold;"></p>
-                </div>
-
-                <div id="admin-report-controls">
-                    <strong>Raporty:</strong>
-                    <button onclick="downloadReport('full_csv')" style="background:#007bff;">Pełny Raport (CSV)</button>
-                    <button onclick="showEntriesReport()" style="background:#5cb85c;">Raport Wejść (Tabela)</button>
-                </div>
-            </div>
-        </div>
+        <input type="text" id="apartment-code" placeholder="Kod apartamentu">
         
-        <div id="entries-report-container" class="hidden card" style="margin-top: 20px;">
-            <h4>📊 Raport Wejść (Zrealizowane rezerwacje)</h4>
-            <table id="entries-report-table" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-                </table>
-        </div>
+        <button id="login-button">Wejdź do Strefy</button>
 
-        <div id="calendar-container"></div>
+        <div class="message" id="message-area"></div>
     </div>
 
     <script>
-        let currentUser = null;
-        let adminBookingMode = false; 
-        
-        // Rejestracja Service Workera dla PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
-                .then(registration => {
-                    console.log('ServiceWorker registered: ', registration);
-                })
-                .catch(registrationError => {
-                    console.log('ServiceWorker registration failed: ', registrationError);
-                });
-            });
-        }
-        
-        function calculateEndTime(startTime) {
-            const [hours, minutes] = startTime.split(':').map(Number);
-            const date = new Date();
-            date.setHours(hours, minutes + 50, 0); 
-            
-            const endHours = String(date.getHours()).padStart(2, '0');
-            const endMinutes = String(date.getMinutes()).padStart(2, '0');
-            
-            return `${endHours}:${endMinutes}`;
-        }
-        
-        function toggleAdminPassword() {
-            const isAdmin = document.getElementById('admin-checkbox').checked;
-            const passField = document.getElementById('password-field');
-            if (isAdmin) {
-                passField.classList.remove('hidden');
-            } else {
-                passField.classList.add('hidden');
-                document.getElementById('pass-input').value = ''; 
-            }
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const apartmentCodeInput = document.getElementById('apartment-code');
+            const loginButton = document.getElementById('login-button');
+            const messageArea = document.getElementById('message-area');
+            const adminToggle = document.getElementById('admin-toggle');
+            const inputLabel = document.getElementById('input-label');
 
-        async function handleLogin() {
-            const code = document.getElementById('code-input').value;
-            const isAdminChecked = document.getElementById('admin-checkbox').checked;
-            const password = isAdminChecked ? document.getElementById('pass-input').value : '';
+            let isAdmin = false; // Stan początkowy: logowanie użytkownika
 
-            // NOWY ENDPOINT NETLIFY
-            const response = await fetch('/.netlify/functions/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code, password })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                currentUser = data;
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('app-screen').classList.remove('hidden');
-                document.getElementById('user-name').innerText = data.name;
-                
-                if (data.role === 'admin') {
-                    document.getElementById('admin-controls').classList.remove('hidden');
-                    loadApartments(); 
+            // --- FUNKCJA PRZEŁĄCZANIA WIDOKU ADMINA ---
+            adminToggle.addEventListener('click', () => {
+                isAdmin = !isAdmin;
+                if (isAdmin) {
+                    adminToggle.textContent = 'Logowanie Użytkownika';
+                    inputLabel.textContent = 'Wpisz Login Admina (np. AGNIESZKA)';
+                    apartmentCodeInput.placeholder = 'Login Admina';
                 } else {
-                     document.getElementById('admin-controls').classList.add('hidden');
+                    adminToggle.textContent = 'Logowanie Admina';
+                    inputLabel.textContent = 'Wpisz kod apartamentu (np. 1001)';
+                    apartmentCodeInput.placeholder = 'Kod apartamentu';
                 }
-                loadSlots();
-            } else {
-                const err = document.getElementById('login-error');
-                err.innerText = data.message;
-                err.style.display = 'block';
-            }
-        }
-        
-        async function loadApartments() {
-            // NOWY ENDPOINT NETLIFY
-            const response = await fetch('/.netlify/functions/apartments');
-            const apartments = await response.json();
-            const select = document.getElementById('apartment-select');
-            
-            while (select.options.length > 1) {
-                select.remove(1);
-            }
-            
-            apartments.forEach(apt => {
-                const option = document.createElement('option');
-                option.value = apt.id;
-                option.text = apt.apartment_name;
-                select.add(option);
+                messageArea.textContent = '';
+                apartmentCodeInput.value = ''; // Wyczyść pole po zmianie trybu
             });
-        }
-        
-        function toggleAdminBookingMode() {
-            const select = document.getElementById('apartment-select');
-            const status = document.getElementById('admin-mode-status');
-            
-            if (adminBookingMode) {
-                adminBookingMode = false;
-                status.innerText = '';
-                select.disabled = false;
-                alert('Tryb rezerwacji Admina DEZAKTYWOWANY.');
-            } else {
-                if (!select.value) {
-                    alert('Proszę najpierw wybrać apartament, dla którego ma być rezerwacja.');
+
+            // --- FUNKCJA LOGOWANIA ---
+            loginButton.addEventListener('click', async () => {
+                const identifier = apartmentCodeInput.value.trim();
+                messageArea.textContent = 'Ładowanie...';
+                messageArea.className = 'message';
+
+                if (!identifier) {
+                    messageArea.textContent = 'Wpisz kod lub login.';
+                    messageArea.className = 'message error';
                     return;
                 }
-                adminBookingMode = true;
-                status.innerText = `AKTYWNY TRYB REZERWACJI dla: ${select.options[select.selectedIndex].text}. Kliknij slot, aby zarezerwować.`;
-                select.disabled = true;
-                alert('Tryb rezerwacji Admina AKTYWOWANY. Kliknij zielony slot w kalendarzu.');
-            }
-            loadSlots(); 
-        }
 
-        async function loadSlots() {
-            const container = document.getElementById('calendar-container');
-            container.innerHTML = '<div class="card">Ładowanie...</div>';
-            
-            // NOWY ENDPOINT NETLIFY
-            const response = await fetch(`/.netlify/functions/slots?user_id=${currentUser.user_id}`);
-            const days = await response.json();
-            
-            container.innerHTML = ''; 
+                const dataToSend = {
+                    identifier: identifier, // Poprawna nazwa klucza!
+                    is_admin: isAdmin
+                };
 
-            days.forEach(day => {
-                const dayDiv = document.createElement('div');
-                dayDiv.className = 'day-column card';
-                
-                let html = `<h4>${day.date}</h4>`;
-                
-                day.slots.forEach(slot => {
-                    let slotClass = '';
-                    let slotContent = '';
-                    let actionsHtml = '';
-                    
-                    const fullTimeRange = `${slot.time} - ${calculateEndTime(slot.time)}`;
-                    
-                    if (slot.is_free) {
-                        slotClass = 'free';
-                        slotContent = `<span>${fullTimeRange} - Wolne</span>`;
+                try {
+                    const response = await fetch('/.netlify/functions/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(dataToSend)
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok && result.success) {
+                        // Logowanie pomyślne
+                        messageArea.textContent = `Witaj, ${result.user.apartment_name}! Logowanie pomyślne.`;
+                        messageArea.className = 'message success';
                         
-                        let buttonAction = `book('${day.date}', '${slot.time}')`;
-                        let buttonStyle = `background: var(--secondary-color);`;
-                        
-                        if (currentUser.role === 'admin' && adminBookingMode) {
-                            buttonAction = `bookAdmin('${day.date}', '${slot.time}')`;
-                            buttonStyle = `background: orange;`;
-                        } else if (currentUser.role === 'admin' && !adminBookingMode) {
-                             buttonAction = `alert('Aktywuj tryb rezerwacji admina, aby zarezerwować dla apartamentu.')`;
-                             buttonStyle = `background: #6c757d;`;
-                        }
-                        
-                        actionsHtml = `<button onclick="${buttonAction}" style="width:auto; padding:6px 12px; ${buttonStyle}">Rezerwuj</button>`;
-                    
-                    } else if (slot.is_current_user_reservation) {
-                        slotClass = 'my-reservation';
-                        slotContent = `<span>${fullTimeRange} - Twoja Rezerwacja</span>`;
-                        actionsHtml = `<button onclick="cancel('${day.date}', '${slot.time}')" style="width:auto; padding:6px 12px; background: #dc3545;">Anuluj</button>`;
-                    
+                        // Tutaj dodaj kod do przechowywania informacji o użytkowniku 
+                        // i przekierowania (np. window.location.href = 'reservation.html';)
+
                     } else {
-                        // Slot zajęty
-                        slotClass = 'taken';
-                        const reservedBy = currentUser.role === 'admin' ? ` (${slot.reserved_by})` : "";
-                        slotContent = `<span>${fullTimeRange} - Zajęte${reservedBy}</span>`;
-                        actionsHtml = '';
-                        
-                        // Przycisk anulowania dla admina
-                        if (currentUser.role === 'admin' && slot.reservation_id) {
-                            actionsHtml += `<button onclick="adminCancel(${slot.reservation_id}, '${slot.reserved_by}', '${fullTimeRange}')" style="width:auto; padding:6px 12px; background: #673AB7; margin-left: 5px;">Anuluj (A)</button>`;
-                        }
+                        // Błąd autoryzacji lub walidacji (np. 401, 400)
+                        messageArea.textContent = result.message || 'Błąd logowania. Spróbuj ponownie.';
+                        messageArea.className = 'message error';
+
+                        // Jeśli wystąpił błąd 500/502 (jak wcześniej), 
+                        // zobaczysz tutaj treść komunikatu zwróconego z funkcji.
+                        console.error("Błąd z funkcji:", result);
                     }
 
-                    html += `<div class="slot ${slotClass}">
-                                ${slotContent}
-                                <div class="slot-actions">${actionsHtml}</div>
-                             </div>`;
-                });
-                
-                dayDiv.innerHTML = html;
-                container.appendChild(dayDiv);
-            });
-        }
-        
-        async function book(date, time) {
-             const fullTimeRange = `${time} - ${calculateEndTime(time)}`;
-             if (!confirm(`Potwierdź rezerwację: ${date} godz. ${fullTimeRange}?`)) return;
-
-            // NOWY ENDPOINT NETLIFY
-            const response = await fetch('/.netlify/functions/book', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: currentUser.user_id,
-                    role: currentUser.role,
-                    date: date,
-                    time: time,
-                })
-            });
-
-            const result = await response.json();
-            
-            if (result.success) {
-                let msg = result.message;
-                // Wyświetlenie kodu PIN (TTlock)
-                if (result.pin) {
-                    msg += `\n\nKOD DOSTĘPU: ${result.pin}`;
+                } catch (error) {
+                    // Błąd sieciowy (np. brak połączenia)
+                    console.error('Błąd połączenia z serwerem:', error);
+                    messageArea.textContent = 'Błąd sieci. Sprawdź połączenie lub spróbuj później.';
+                    messageArea.className = 'message error';
                 }
-                alert(msg);
-                loadSlots();
-            } else {
-                alert('Błąd: ' + result.message);
-            }
-        }
-        
-        async function bookAdmin(date, time) {
-            const select = document.getElementById('apartment-select');
-            const target_user_id = select.value;
-            const apartmentName = select.options[select.selectedIndex].text;
-            
-            const fullTimeRange = `${time} - ${calculateEndTime(time)}`;
-            if (!confirm(`ADMIN: Czy na pewno zarezerwować ${fullTimeRange} dnia ${date} dla: ${apartmentName}?`)) return;
-
-            // NOWY ENDPOINT NETLIFY
-            const response = await fetch('/.netlify/functions/book', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: currentUser.user_id,
-                    role: currentUser.role,
-                    date: date,
-                    time: time,
-                    target_user_id: target_user_id 
-                })
             });
-
-            const result = await response.json();
-            
-            if (result.success) {
-                let msg = `Rezerwacja dla ${apartmentName} udana!`;
-                 // Wyświetlenie kodu PIN (TTlock)
-                if (result.pin) {
-                    msg += `\n\nKOD DOSTĘPU: ${result.pin}`;
-                }
-                alert(msg);
-                loadSlots();
-            } else {
-                alert('Błąd: ' + result.message);
-            }
-        }
-        
-        async function cancel(date, time) {
-            const fullTimeRange = `${time} - ${calculateEndTime(time)}`;
-            if (!confirm(`UWAGA: Anulować rezerwację: ${date} godz. ${fullTimeRange}? Wymagane 60 min marginesu.`)) return;
-
-            // NOWY ENDPOINT NETLIFY
-            const response = await fetch('/.netlify/functions/cancel', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: currentUser.user_id,
-                    date: date,
-                    time: time
-                })
-            });
-
-            const result = await response.json();
-            
-            if (result.success) {
-                alert('Pomyślnie anulowano!');
-                loadSlots();
-            } else {
-                alert('Błąd anulowania: ' + result.message);
-            }
-        }
-        
-        async function adminCancel(reservationId, apartmentName, fullTimeRange) {
-            if (!confirm(`ADMINISTRATOR: Anulować rezerwację ID ${reservationId} (${fullTimeRange}) dla apartamentu: ${apartmentName}? Ta akcja zostanie zapisana.`)) return;
-            
-            // NOWY ENDPOINT NETLIFY
-            const response = await fetch('/.netlify/functions/admin_cancel', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    reservation_id: reservationId
-                })
-            });
-
-            const result = await response.json();
-            
-            if (result.success) {
-                alert(result.message);
-                loadSlots(); 
-            } else {
-                alert('Błąd anulowania przez Admina: ' + result.message);
-            }
-        }
-
-        function logout() {
-            currentUser = null;
-            adminBookingMode = false;
-            // Można dodać bardziej zaawansowane czyszczenie stanu, ale przeładowanie wystarczy
-            location.reload(); 
-        }
-
-        async function showEntriesReport() {
-            const container = document.getElementById('entries-report-container');
-            const table = document.getElementById('entries-report-table');
-            table.innerHTML = '<tr><td colspan="20">Ładowanie raportu...</td></tr>';
-            container.classList.remove('hidden');
-
-            try {
-                // NOWY ENDPOINT NETLIFY
-                const response = await fetch('/.netlify/functions/report_entries');
-                const result = await response.json();
-
-                if (!result.success) {
-                    table.innerHTML = `<tr><td colspan="20" style="color: var(--taken-color);">Błąd: ${result.message}</td></tr>`;
-                    return;
-                }
-
-                const data = result.table_data;
-                const apts = result.apartments;
-                
-                // Nagłówki (ROK i MIESIĄC, MIESIĄC, APARTAMENTY 1-18)
-                let headerHtml = `<thead><tr><th>ROK i MIESIĄC</th><th>MIESIĄC</th>`;
-                apts.forEach(apt => {
-                    // Skracanie nazwy do "APT X" dla lepszego widoku w tabeli
-                    headerHtml += `<th>${apt.replace('APARTAMENT ', 'APT ')}</th>`;
-                });
-                headerHtml += `</tr></thead>`;
-                
-                // Ciało tabeli (ilość wejść)
-                let bodyHtml = '<tbody>';
-                data.forEach(row => {
-                    bodyHtml += `<tr><td>${row.ROK_MIESIĄC}</td><td>${row.MIESIĄC}</td>`;
-                    apts.forEach(apt => {
-                        bodyHtml += `<td style="text-align: center;">${row[apt] || 0}</td>`;
-                    });
-                    bodyHtml += `</tr>`;
-                });
-                bodyHtml += '</tbody>';
-
-                table.innerHTML = headerHtml + bodyHtml;
-
-            } catch (error) {
-                console.error("Error loading entries report:", error);
-                table.innerHTML = `<tr><td colspan="20" style="color: var(--taken-color);">Błąd komunikacji: Sprawdź konsolę przeglądarki.</td></tr>`;
-            }
-        }
-
-        function downloadReport(type) {
-            if (type === 'full_csv') {
-                // NOWY ENDPOINT NETLIFY
-                const url = '/.netlify/functions/report_full';
-                window.open(url, '_blank'); 
-            } else {
-                 alert('Nieznany typ raportu.');
-            }
-        }
+        });
     </script>
 </body>
 </html>
