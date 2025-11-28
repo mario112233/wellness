@@ -43,8 +43,24 @@ exports.handler = async (event) => {
             })
         };
 
+   // netlify/functions/login.js (modyfikacja bloku catch)
+
+// ... (logika funkcji)
+
     } catch (error) {
-        console.error("Login error:", error);
-        return { statusCode: 500, body: JSON.stringify({ success: false, message: "Wewnętrzny błąd serwera." }) };
-    }
-};
+        // Ta linijka zapisze błąd w logach Netlify Functions (które są trudno dostępne)
+        console.error('Błąd logowania:', error); 
+        
+        // Zwracamy szczegółowy błąd (error.message) do klienta, aby go zobaczyć w Narzędziach Deweloperskich
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ 
+                success: false, 
+                // Tę linię zmieniamy, aby zwróciła prawdziwy komunikat błędu!
+                message: error.message || 'Wystąpił błąd w funkcji logowania.' 
+            }),
+        };
+    } finally {
+        // ...
+
+  
