@@ -17,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "pg": "^8.11.3" 
+    "pg": "^8.11.3",
+    "moment-timezone": "^0.5.45" 
   }
 }
