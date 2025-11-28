@@ -1,15 +1,22 @@
 {
-  "name": "netlify-wellness-reservations",
+  "name": "wellness-reservations-netlify",
   "version": "1.0.0",
-  "description": "Wellness reservation system for Netlify",
-  "main": "index.js",
+  "description": "System rezerwacji Strefy Wellness z Netlify Functions i Supabase.",
+  "main": "index.html",
   "scripts": {
-    "start": "netlify dev"
+    "start": "netlify dev",
+    "build": "echo 'Build complete'"
   },
+  "keywords": [
+    "netlify",
+    "functions",
+    "supabase",
+    "postgres",
+    "pwa"
+  ],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "pg": "^8.11.3",
-    "moment-timezone": "^0.5.45",
-    "csv-writer": "^1.6.0",
-    "stream-buffers": "^3.0.2"
+    "pg": "^8.11.3" 
   }
 }
