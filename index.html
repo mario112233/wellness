@@ -52,6 +52,13 @@
         button:hover {
             background-color: #45a049;
         }
+        .admin-button {
+            background-color: #007bff; /* Inny kolor dla admina */
+            margin-top: 15px;
+        }
+        .admin-button:hover {
+            background-color: #0056b3;
+        }
         .message {
             margin-top: 20px;
             padding: 10px;
@@ -93,9 +100,17 @@
 
     <div id="app-view" class="container" style="display:none;">
         <h1 id="welcome-message">Witaj w strefie rezerwacji!</h1>
-        <p>Tutaj znajdzie się kalendarz i opcje rezerwacji (w przyszłości).</p>
+        
         <p>Twoje dane: <strong id="user-info"></strong></p>
         <hr>
+
+        <div id="admin-actions" style="display:none;">
+            <h2>Panel Administratora</h2>
+            <button id="show-reports-button" class="admin-button">Pokaż Raporty Rezerwacji</button>
+            <button id="manage-reservations-button" class="admin-button" style="background-color: #dc3545;">Zarządzaj i Usuń Rezerwacje</button>
+            <hr>
+        </div>
+
         <button id="calendar-view-button">Przejdź do Kalendarza</button>
         <button id="logout-button" style="background-color: #f44336;">Wyloguj</button>
     </div>
@@ -107,6 +122,7 @@
             const welcomeMessage = document.getElementById('welcome-message');
             const logoutButton = document.getElementById('logout-button');
             const userInfo = document.getElementById('user-info');
+            const adminActions = document.getElementById('admin-actions'); // Nowy element
             
             const apartmentCodeInput = document.getElementById('apartment-code');
             const loginButton = document.getElementById('login-button');
@@ -152,9 +168,10 @@
                     return;
                 }
 
+                // WYSYŁAMY FLAGĘ is_admin DO FUNKCJI NETLIFY
                 const dataToSend = {
                     identifier: identifier,
-                    is_admin: isAdmin
+                    is_admin: isAdmin // Wartość z przełącznika
                 };
 
                 try {
@@ -164,7 +181,6 @@
                         body: JSON.stringify(dataToSend)
                     });
 
-                    // Zawsze próbujemy sparsować odpowiedź jako JSON
                     const result = await response.json(); 
 
                     if (response.ok && result.success) {
@@ -176,15 +192,22 @@
                         currentUserIdentifier = result.user.identifier;
                         currentApartmentName = result.user.apartment_name;
                         
-                        welcomeMessage.textContent = isAdmin 
+                        welcomeMessage.textContent = result.user.is_admin 
                             ? `Witaj, Administratorze ${currentApartmentName}!`
                             : `Witaj, ${currentApartmentName}!`;
                         
-                        userInfo.textContent = `Kod: ${currentUserIdentifier}. Tryb: ${isAdmin ? 'ADMIN' : 'UŻYTKOWNIK'}.`;
+                        userInfo.textContent = `Kod: ${currentUserIdentifier}. Tryb: ${result.user.is_admin ? 'ADMIN' : 'UŻYTKOWNIK'}.`;
+
+                        // WAŻNE: Pokaż lub ukryj panel admina w zależności od roli z bazy danych
+                        if (result.user.is_admin) {
+                            adminActions.style.display = 'block';
+                        } else {
+                            adminActions.style.display = 'none';
+                        }
+
 
                         setTimeout(() => {
                             showView('app'); // Pokaż widok aplikacji
-                            // Tutaj należy dodać funkcję ładującą kalendarz
                         }, 1000); 
 
                     } else {
@@ -195,8 +218,7 @@
                     }
 
                 } catch (error) {
-                    // Błąd sieciowy lub błąd parsowania JSON
-                    console.error('Błąd połączenia z serwerem lub parsowania odpowiedzi:', error);
+                    console.error('Błąd połączenia z serwerem:', error);
                     messageArea.textContent = 'Błąd sieci lub wewnętrzny błąd serwera. Spróbuj później.';
                     messageArea.className = 'message error';
                 }
@@ -206,12 +228,12 @@
             logoutButton.addEventListener('click', () => {
                 currentUserIdentifier = null;
                 currentApartmentName = null;
+                adminActions.style.display = 'none'; // Ukryj admina przy wylogowaniu
                 apartmentCodeInput.value = '';
                 messageArea.textContent = '';
                 showView('login');
             });
             
-            // Upewniamy się, że na start widać tylko logowanie
             showView('login');
         });
     </script>

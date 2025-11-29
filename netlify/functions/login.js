@@ -1,6 +1,6 @@
 // netlify/functions/login.js
 
-const { pool } = require('./db_config'); // Upewnij się, że db_config jest w tym samym katalogu
+const { pool } = require('./db_config'); 
 
 exports.handler = async (event) => {
     
@@ -16,6 +16,8 @@ exports.handler = async (event) => {
     }
 
     const identifier = data.identifier;
+    // POBIERAMY Z FRONT-ENDU, CZY UŻYTKOWNIK WYBRAŁ ADMINA
+    const isAdmin = data.is_admin; 
     
     if (!identifier) {
         return { statusCode: 400, body: JSON.stringify({ success: false, message: "Brak kodu apartamentu/loginu." }) };
@@ -27,33 +29,34 @@ exports.handler = async (event) => {
         let query;
         let values;
 
-        // OSTATECZNA WERSJA TESTOWA:
-        // 1. Użycie cudzysłowów (") dla nazw tabeli/kolumn, aby uniknąć problemów z wielkością liter w Postgresie.
-        // 2. USUNIĘCIE warunku is_admin, aby sprawdzić, czy jakikolwiek rekord pasuje.
-        
-        // Ponieważ nie znamy dokładnej wielkości liter loginu admina, 
-        // użyjemy .toUpperCase() tylko dla bezpieczeństwa
-        const finalIdentifier = data.is_admin ? identifier.toUpperCase() : identifier;
+        if (isAdmin) {
+            // Logowanie Admina: Wyszukaj po loginie, upewnij się, że to admin
+            // UWAGA: Używamy bezpiecznej składni z cudzysłowami (")
+            query = `SELECT "id", "apartment_name", "identifier", "is_admin" FROM "users" WHERE "identifier" = $1 AND "is_admin" = TRUE;`;
+            values = [identifier.toUpperCase()]; // Login Admina to zazwyczaj UPPERCASE
+        } else {
+            // Logowanie Użytkownika: Wyszukaj po identifierze, upewnij się, że to NIE admin
+            // UWAGA: Używamy bezpiecznej składni z cudzysłowami (")
+            query = `SELECT "id", "apartment_name", "identifier", "is_admin" FROM "users" WHERE "identifier" = $1 AND "is_admin" = FALSE;`;
+            values = [identifier];
+        }
 
-        query = `SELECT "id", "apartment_name", "identifier", "is_admin" FROM "users" WHERE "identifier" = $1;`;
-        values = [finalIdentifier];
-        
         const res = await client.query(query, values);
 
         if (res.rows.length === 1) {
             const user = res.rows[0];
-            // Logowanie pomyślne - Jeśli ten kod zadziała, problemem był warunek is_admin
+            // Logowanie pomyślne
             return {
                 statusCode: 200,
                 body: JSON.stringify({ success: true, message: `Zalogowano jako ${user.apartment_name}.`, user: {
                     id: user.id,
                     apartment_name: user.apartment_name,
                     identifier: user.identifier,
-                    is_admin: user.is_admin
+                    is_admin: user.is_admin // Zwracamy rolę, aby front-end wiedział, co pokazać
                 }}),
             };
         } else {
-            // Błąd logowania, jeśli żaden rekord nie został znaleziony
+            // Brak użytkownika lub niepoprawna rola/kod
             return {
                 statusCode: 401,
                 body: JSON.stringify({ success: false, message: 'Nieprawidłowy kod/login lub brak dostępu.' }),
@@ -61,9 +64,8 @@ exports.handler = async (event) => {
         }
 
     } catch (error) {
-        console.error("CRITICAL LOGIN ERROR:", error);
-        // Jeśli błąd nadal występuje, Netlify nie może nawet wykonać zapytania SQL
-        return { statusCode: 500, body: JSON.stringify({ success: false, message: "Wewnętrzny błąd serwera. Sprawdź, czy klucz połączeniowy jest poprawny." }) };
+        console.error("Login Error:", error);
+        return { statusCode: 500, body: JSON.stringify({ success: false, message: "Wewnętrzny błąd serwera. Spróbuj później." }) };
     } finally {
         client.release();
     }
