@@ -21,7 +21,7 @@
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 450px; /* Nieco szerszy, aby pomieścić widok aplikacji */
+            max-width: 450px;
         }
         h1 {
             color: #4CAF50;
@@ -47,7 +47,7 @@
             cursor: pointer;
             font-size: 16px;
             transition: background-color 0.3s;
-            margin-bottom: 10px; /* Dodane, by oddzielić przyciski */
+            margin-bottom: 10px;
         }
         button:hover {
             background-color: #45a049;
@@ -164,7 +164,8 @@
                         body: JSON.stringify(dataToSend)
                     });
 
-                    const result = await response.json();
+                    // Zawsze próbujemy sparsować odpowiedź jako JSON
+                    const result = await response.json(); 
 
                     if (response.ok && result.success) {
                         // Logowanie pomyślne
@@ -194,9 +195,9 @@
                     }
 
                 } catch (error) {
-                    // Błąd sieciowy
-                    console.error('Błąd połączenia z serwerem:', error);
-                    messageArea.textContent = 'Błąd sieci. Sprawdź połączenie lub spróbuj później.';
+                    // Błąd sieciowy lub błąd parsowania JSON
+                    console.error('Błąd połączenia z serwerem lub parsowania odpowiedzi:', error);
+                    messageArea.textContent = 'Błąd sieci lub wewnętrzny błąd serwera. Spróbuj później.';
                     messageArea.className = 'message error';
                 }
             });

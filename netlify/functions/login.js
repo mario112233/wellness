@@ -1,94 +1,72 @@
 // netlify/functions/login.js
 
-const { pool } = require('./db_config');
+const { pool } = require('./db_config'); // Upewnij się, że db_config jest w tym samym katalogu
 
 exports.handler = async (event) => {
-    // Akceptujemy tylko metodę POST
+    
+    // 1. Walidacja metody
     if (event.httpMethod !== 'POST') {
         return { statusCode: 405, body: JSON.stringify({ message: 'Method Not Allowed' }) };
     }
 
-    // Sprawdzenie, czy body jest dostępne
-    if (!event.body) {
-        return { statusCode: 400, body: JSON.stringify({ success: false, message: 'Missing request body.' }) };
-    }
-
+    // 2. Parsowanie ciała żądania
     let data;
     try {
-        // Parsowanie danych JSON
-        data = JSON.parse(event.body);
-    } catch (e) {
-        return { statusCode: 400, body: JSON.stringify({ success: false, message: 'Invalid JSON format.' }) };
+        // Netlify Functions przesyłają ciało jako string JSON
+        data = JSON.parse(event.body); 
+    } catch (error) {
+        return { statusCode: 400, body: JSON.stringify({ success: false, message: "Invalid JSON format." }) };
     }
 
-    const { identifier, is_admin } = data;
-    let client; // Deklaracja klienta poza blokiem try
-
-    // Weryfikacja danych wejściowych
+    const identifier = data.identifier;
+    const isAdmin = data.is_admin;
+    
     if (!identifier) {
-        return { statusCode: 400, body: JSON.stringify({ success: false, message: 'Identifier is required.' }) };
+        return { statusCode: 400, body: JSON.stringify({ success: false, message: "Brak kodu apartamentu/loginu." }) };
     }
+
+    const client = await pool.connect();
 
     try {
-        // Uzyskanie klienta z puli połączeń
-        client = await pool.connect(); 
-
         let query;
-        let queryParams = [identifier];
-        
-        // Zapytanie SQL
-        if (is_admin) {
-            // Logowanie Admina
-            query = `SELECT id, apartment_name, identifier, is_admin FROM users WHERE identifier = $1 AND is_admin = TRUE;`;
-        } else {
-            // Logowanie Użytkownika
-            query = `SELECT id, apartment_name, identifier, is_admin FROM users WHERE identifier = $1 AND is_admin = FALSE;`;
-        }
-        
-        const result = await client.query(query, queryParams);
+        let values;
 
-        if (result.rows.length === 1) {
-            const user = result.rows[0];
-            
+        if (isAdmin) {
+            // Logowanie Admina: Wyszukaj po loginie, upewnij się, że to admin
+            query = `SELECT id, apartment_name, identifier, is_admin FROM users WHERE identifier = $1 AND is_admin = TRUE;`;
+            values = [identifier.toUpperCase()]; // Użycie UPPERCASE dla admina
+        } else {
+            // Logowanie Użytkownika: Wyszukaj po identifierze, upewnij się, że to nie admin
+            query = `SELECT id, apartment_name, identifier, is_admin FROM users WHERE identifier = $1 AND is_admin = FALSE;`;
+            values = [identifier];
+        }
+
+        const res = await client.query(query, values);
+
+        if (res.rows.length === 1) {
+            const user = res.rows[0];
             // Logowanie pomyślne
             return {
                 statusCode: 200,
-                body: JSON.stringify({ 
-                    success: true, 
-                    user: {
-                        id: user.id,
-                        apartment_name: user.apartment_name,
-                        identifier: user.identifier,
-                        is_admin: user.is_admin
-                    }
-                })
+                body: JSON.stringify({ success: true, message: `Zalogowano jako ${user.apartment_name}.`, user: {
+                    id: user.id,
+                    apartment_name: user.apartment_name,
+                    identifier: user.identifier,
+                    is_admin: user.is_admin
+                }}),
             };
         } else {
-            // Użytkownik nie znaleziony lub nie jest adminem
+            // Brak użytkownika lub niepoprawna rola/kod
             return {
                 statusCode: 401,
-                body: JSON.stringify({ success: false, message: 'Nieprawidłowy kod lub brak uprawnień.' })
+                body: JSON.stringify({ success: false, message: 'Nieprawidłowy kod/login lub brak dostępu.' }),
             };
         }
 
     } catch (error) {
-        // Logowanie błędu do konsoli Netlify
-        console.error('Database/Function Error:', error); 
-        
-        // Zwracamy status 500 z komunikatem, aby ułatwić debugowanie
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ 
-                success: false, 
-                // Zwracamy treść błędu, by zobaczyć, czy to błąd hasła/sieci
-                message: error.message || 'Wystąpił wewnętrzny błąd serwera.' 
-            }),
-        };
+        console.error("Login Error:", error);
+        return { statusCode: 500, body: JSON.stringify({ success: false, message: "Wewnętrzny błąd serwera." }) };
     } finally {
-        // KRTYCZNE: Zwalnia klienta z powrotem do puli po zakończeniu.
-        // Zapobiega błędom 502/500 spowodowanym brakiem dostępnych połączeń.
-        if (client) {
-            client.release();
-        }
+        client.release();
     }
 };

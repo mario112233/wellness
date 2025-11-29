@@ -6,8 +6,8 @@ const pool = new Pool({
     // Używamy zmiennej środowiskowej ustawionej w Netlify
     connectionString: process.env.DATABASE_URL,
     
-    // Kluczowa konfiguracja SSL dla połączeń z chmury (np. Netlify)
-    // Zapewnia, że połączenie z Supabase/PostgreSQL jest akceptowane
+    // Kluczowa konfiguracja SSL dla połączeń z chmury (Netlify)
+    // To jest niezbędne dla Supabase
     ssl: {
         rejectUnauthorized: false
     }
