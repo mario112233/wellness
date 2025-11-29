@@ -21,7 +21,7 @@
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 400px;
+            max-width: 450px; /* Nieco szerszy, aby pomieścić widok aplikacji */
         }
         h1 {
             color: #4CAF50;
@@ -47,6 +47,7 @@
             cursor: pointer;
             font-size: 16px;
             transition: background-color 0.3s;
+            margin-bottom: 10px; /* Dodane, by oddzielić przyciski */
         }
         button:hover {
             background-color: #45a049;
@@ -75,8 +76,9 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Wellness Center - Rezerwacje</h1>
+    
+    <div id="login-view" class="container">
+        <h1>Wellness Center - Logowanie</h1>
         
         <span class="admin-link" id="admin-toggle">Logowanie Admina</span>
 
@@ -89,15 +91,38 @@
         <div class="message" id="message-area"></div>
     </div>
 
+    <div id="app-view" class="container" style="display:none;">
+        <h1 id="welcome-message">Witaj w strefie rezerwacji!</h1>
+        <p>Tutaj znajdzie się kalendarz i opcje rezerwacji (w przyszłości).</p>
+        <p>Twoje dane: <strong id="user-info"></strong></p>
+        <hr>
+        <button id="calendar-view-button">Przejdź do Kalendarza</button>
+        <button id="logout-button" style="background-color: #f44336;">Wyloguj</button>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const loginView = document.getElementById('login-view');
+            const appView = document.getElementById('app-view');
+            const welcomeMessage = document.getElementById('welcome-message');
+            const logoutButton = document.getElementById('logout-button');
+            const userInfo = document.getElementById('user-info');
+            
             const apartmentCodeInput = document.getElementById('apartment-code');
             const loginButton = document.getElementById('login-button');
             const messageArea = document.getElementById('message-area');
             const adminToggle = document.getElementById('admin-toggle');
             const inputLabel = document.getElementById('input-label');
 
-            let isAdmin = false; // Stan początkowy: logowanie użytkownika
+            let isAdmin = false; 
+            let currentUserIdentifier = null;
+            let currentApartmentName = null;
+            
+            // --- FUNKCJA PRZEŁĄCZANIA WIDOKÓW ---
+            function showView(viewId) {
+                loginView.style.display = (viewId === 'login') ? 'block' : 'none';
+                appView.style.display = (viewId === 'app') ? 'block' : 'none';
+            }
 
             // --- FUNKCJA PRZEŁĄCZANIA WIDOKU ADMINA ---
             adminToggle.addEventListener('click', () => {
@@ -112,7 +137,7 @@
                     apartmentCodeInput.placeholder = 'Kod apartamentu';
                 }
                 messageArea.textContent = '';
-                apartmentCodeInput.value = ''; // Wyczyść pole po zmianie trybu
+                apartmentCodeInput.value = '';
             });
 
             // --- FUNKCJA LOGOWANIA ---
@@ -128,7 +153,7 @@
                 }
 
                 const dataToSend = {
-                    identifier: identifier, // Poprawna nazwa klucza!
+                    identifier: identifier,
                     is_admin: isAdmin
                 };
 
@@ -145,27 +170,48 @@
                         // Logowanie pomyślne
                         messageArea.textContent = `Witaj, ${result.user.apartment_name}! Logowanie pomyślne.`;
                         messageArea.className = 'message success';
+
+                        // Zapisz dane użytkownika i przełącz widok
+                        currentUserIdentifier = result.user.identifier;
+                        currentApartmentName = result.user.apartment_name;
                         
-                        // Tutaj dodaj kod do przechowywania informacji o użytkowniku 
-                        // i przekierowania (np. window.location.href = 'reservation.html';)
+                        welcomeMessage.textContent = isAdmin 
+                            ? `Witaj, Administratorze ${currentApartmentName}!`
+                            : `Witaj, ${currentApartmentName}!`;
+                        
+                        userInfo.textContent = `Kod: ${currentUserIdentifier}. Tryb: ${isAdmin ? 'ADMIN' : 'UŻYTKOWNIK'}.`;
+
+                        setTimeout(() => {
+                            showView('app'); // Pokaż widok aplikacji
+                            // Tutaj należy dodać funkcję ładującą kalendarz
+                        }, 1000); 
 
                     } else {
-                        // Błąd autoryzacji lub walidacji (np. 401, 400)
+                        // Błąd autoryzacji
                         messageArea.textContent = result.message || 'Błąd logowania. Spróbuj ponownie.';
                         messageArea.className = 'message error';
-
-                        // Jeśli wystąpił błąd 500/502 (jak wcześniej), 
-                        // zobaczysz tutaj treść komunikatu zwróconego z funkcji.
                         console.error("Błąd z funkcji:", result);
                     }
 
                 } catch (error) {
-                    // Błąd sieciowy (np. brak połączenia)
+                    // Błąd sieciowy
                     console.error('Błąd połączenia z serwerem:', error);
                     messageArea.textContent = 'Błąd sieci. Sprawdź połączenie lub spróbuj później.';
                     messageArea.className = 'message error';
                 }
             });
+
+            // --- FUNKCJA WYLOGOWANIA ---
+            logoutButton.addEventListener('click', () => {
+                currentUserIdentifier = null;
+                currentApartmentName = null;
+                apartmentCodeInput.value = '';
+                messageArea.textContent = '';
+                showView('login');
+            });
+            
+            // Upewniamy się, że na start widać tylko logowanie
+            showView('login');
         });
     </script>
 </body>

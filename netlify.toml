@@ -1,8 +1,23 @@
+# Netlify.toml
+
 [build]
-  publish = "."
+  # Katalog zawierający pliki front-endu do opublikowania (główny katalog projektu)
+  publish = "." 
+  
+  # Katalog, w którym Netlify znajdzie funkcje Serverless
   functions = "netlify/functions"
-  command = "npm install"
+  
+  # Komenda uruchamiana podczas budowania (instalacja zależności Node.js)
+  command = "npm install" 
 
 [functions]
+  # Użycie nowoczesnego bundlera ESBuild dla szybszej kompilacji funkcji
   node_bundler = "esbuild"
-  # Tutaj Netlify Function będą szukały zmiennych środowiskowych (np. DATABASE_URL)
+  # (Uwaga: to ustawienie jest opcjonalne, ale zalecane)
+
+# Ustawienia nagłówków HTTP (opcjonalne, ale zalecane dla API)
+# Zapewnia, że funkcje mogą być wywoływane przez front-end (CORS)
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
